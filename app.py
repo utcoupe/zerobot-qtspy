@@ -11,6 +11,8 @@ from html.entities import codepoint2name as entities
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+import zmq
+
 from client import SuperClient
 
 usage = "usage: %prog [options]"
@@ -23,7 +25,7 @@ htmlentities = lambda x : ''.join('&%s;' % entities[ord(c)] if ord(c) in entitie
 
 class QtSpyWindow(QMainWindow):
     def __init__(self, connect_addr):
-        super(MyWindow, self).__init__()
+        super(QtSpyWindow, self).__init__()
         
         self.ctx = zmq.Context()
         self.receiver = self.ctx.socket(zmq.SUB)
@@ -37,7 +39,7 @@ class QtSpyWindow(QMainWindow):
         self.requests = {}
         
         self.services_views = {}
-        self.services = SuperClient(ctx)
+        self.services = SuperClient(self.ctx)
         
         self.__init_gui()
 
@@ -137,12 +139,13 @@ class QtSpyWindow(QMainWindow):
             message = self.receiver.recv_multipart()
             from_, to, msg = message
             msg = json.loads(msg.decode())
-            
-            if 'data' in msg.keys() or 'error' in msg.keys():
-                new_text = "<br/>"
-                
+
+            print(from_, to, msg)
+            if isinstance(msg, list): #C'est un event
+                self.add_message(from_, "<b>%s : </b> %s" % (to.decode(), repr(msg)))
+            elif 'data' in msg.keys() or 'error' in msg.keys(): # C'est une réponse
                 ans, req = msg, self.requests[msg["uid"]]
-                new_text += "<i style='font-size: small'>%s</i> <b>%s : %s.%s(" % (time.strftime("%H:%M:%S", time.localtime()) ,to.decode(), from_.decode(), req["fct"])
+                new_text = "<b>%s : %s.%s(" % (to.decode(), from_.decode(), req["fct"])
                 for arg in req["args"]:
                     new_text += "%s, " % arg
                 for arg in req["kwargs"].items():
@@ -155,13 +158,17 @@ class QtSpyWindow(QMainWindow):
                 else:
                     new_text += "<span style='color: red;'>Error : %s<br/>Traceback : %s</span>" % (htmlentities(ans["error"]["error"]),
                                                                                                     htmlentities(ans["error"]["tb"]))
-                
-                self.get_textedit(from_).append(new_text)
+                self.add_message(from_, new_text)
                 del self.requests[ans["uid"]]
             else:
                 self.requests[msg["uid"]] = (msg)
 
         return True
+
+    def add_message(self, service, text):
+        message = "<br/><i style='font-size: small'>%s</i> " % time.strftime("%H:%M:%S", time.localtime())
+        message += text
+        self.get_textedit(service).append(message)
 
 if __name__ == '__main__':
     (options, _args) = parser.parse_args()

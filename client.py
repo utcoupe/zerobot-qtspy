@@ -1,3 +1,7 @@
+
+import sys
+
+sys.path.append('../zerobot/python3')
 import zerobot
 import zmq
 import threading
@@ -16,13 +20,13 @@ class SuperClient:
         kwargs['timeout'] = 1
         kwargs['block'] = False
         try:
-            threading.Thread(target=call, args=args, kwargs=kwargs, daemon=True).run()
+            threading.Thread(target=call, args=args, kwargs=kwargs).run()
         except Exception as ex:
             print(ex)
 
     def add_client(self, service):
         if not(service in self.clients.keys()):
-            client = zerobot.Client("QtSpy-%s" % service, self.connect, service, self.ctx)
+            client = zerobot.Client("QtSpy-%s" % service, self.connect, None, service, ctx=self.ctx)
             client.start(False)
             try:
                 client.ping(-42, timeout=1, block=False)
