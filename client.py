@@ -26,7 +26,7 @@ class SuperClient:
 
     def add_client(self, service):
         if not(service in self.clients.keys()):
-            client = zerobot.Client("QtSpy-%s" % service, self.connect, None, service, ctx=self.ctx)
+            client = zerobot.Client("QtSpy-%s" % service, self.connect, service, ctx=self.ctx)
             client.start(False)
             try:
                 client.ping(-42, timeout=1, block=False)

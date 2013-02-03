@@ -141,7 +141,7 @@ class QtSpyWindow(QMainWindow):
             msg = json.loads(msg.decode())
 
             print(from_, to, msg)
-            if isinstance(msg, list): #C'est un event
+            if not(isinstance(msg, dict)): #C'est un event
                 self.add_message(from_, "<b>%s : </b> %s" % (to.decode(), repr(msg)))
             elif 'data' in msg.keys() or 'error' in msg.keys(): # C'est une réponse
                 ans, req = msg, self.requests[msg["uid"]]
