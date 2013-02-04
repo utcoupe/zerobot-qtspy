@@ -136,6 +136,10 @@ class QtSpyWindow(QMainWindow):
 
     def process_stuff(self, sock):
         while self.receiver.getsockopt(zmq.EVENTS) & zmq.POLLIN:
+
+            # Ici, si la fonction n'est pas la bonne, message ne sera pas initialisee!
+            # a corriger.
+            # 
             message = self.receiver.recv_multipart()
             from_, to, msg = message
             msg = json.loads(msg.decode())
@@ -153,7 +157,9 @@ class QtSpyWindow(QMainWindow):
                 if req["args"] or req["kwargs"]:
                     new_text = new_text[:-2]
                 new_text += ")</b><br/>"
-                if ans["error"] is None:
+
+                # Selon l'example dans zerobot, ans["error"] == "" signifie qu'il y pas d'erreur. à la place de is None
+                if ans["error"] == "":
                     new_text += "<span style='color: green;'>%s</span>" % (htmlentities(ans["data"]))
                 else:
                     new_text += "<span style='color: red;'>Error : %s<br/>Traceback : %s</span>" % (htmlentities(ans["error"]["error"]),
