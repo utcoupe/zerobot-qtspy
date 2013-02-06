@@ -159,7 +159,7 @@ class QtSpyWindow(QMainWindow):
                 new_text += ")</b><br/>"
 
                 # Selon l'example dans zerobot, ans["error"] == "" signifie qu'il y pas d'erreur. à la place de is None
-                if ans["error"] == "":
+                if ans["error"] is None:
                     new_text += "<span style='color: green;'>%s</span>" % (htmlentities(ans["data"]))
                 else:
                     new_text += "<span style='color: red;'>Error : %s<br/>Traceback : %s</span>" % (htmlentities(ans["error"]["error"]),
