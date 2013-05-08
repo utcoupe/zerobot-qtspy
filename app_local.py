@@ -18,7 +18,7 @@ from client import SuperClient
 usage = "usage: %prog [options]"
 parser = optparse.OptionParser(usage,version="%prog 0.0.1")
 parser.add_option("-c", "--connect",
-    action="store", dest="connect", default="tcp://192.0.0.2:5002",
+    action="store", dest="connect", default="tcp://localhost:5002",
     help="connect. ex : tcp://localhost:5002")
 
 htmlentities = lambda x : ''.join('&%s;' % entities[ord(c)] if ord(c) in entities else c for c in str(x))
